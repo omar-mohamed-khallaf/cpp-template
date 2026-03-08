@@ -32,17 +32,12 @@
           # Define the development shell
           devShells.default =
             let
-              buildToolsVersion = "35.0.0";
+              buildToolsVersion = "36.0.0";
               cmdLineToolsVersion = "19.0";
-              ndkVersion = "28.2.13676358";
-              cmakeVersion = "3.22.1";
+              ndkVersion = "29.0.14206865";
+              cmakeVersion = "4.1.2";
               androidEnv = pkgs.androidenv;
               androidComp = androidEnv.composeAndroidPackages {
-                platformVersions = [
-                  "35"
-                  "36"
-                ];
-                platformToolsVersion = [ "35.0.1" ];
                 buildToolsVersions = [ buildToolsVersion ];
                 cmakeVersions = [ cmakeVersion ];
                 includeNDK = true;
@@ -68,11 +63,6 @@
                 gcc
                 clang-tools
                 androidSdk
-              ];
-
-              # Libraries your app links against (host-side)
-              buildInputs = with pkgs; [
-                # add any nix-managed libs here if you don't build them via Superbuild
               ];
 
               env = {

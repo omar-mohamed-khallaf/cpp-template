@@ -1,11 +1,13 @@
 #include <gtest/gtest.h>
 
-constexpr auto factorial(auto num) -> int64_t {
+namespace {
+constexpr auto factorial(int num) -> int64_t {
     if (num < 2) {
         return 1;
     }
     return num * factorial(num - 1);
 }
+} // namespace
 
 TEST(FactorialTest, HandlesZeroInput) { EXPECT_EQ(factorial(0), 1); }
 

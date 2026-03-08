@@ -1,5 +1,5 @@
 if(ANDROID)
-    set(CROSS_FLAGS "--target=${TARGET_HOST}${ANDROID_PLATFORM_LEVEL} --sysroot=${CMAKE_SYSROOT}")
+    set(CROSS_FLAGS "--target=${TARGET_HOST} --sysroot=${CMAKE_SYSROOT}")
 else()
     set(CROSS_FLAGS "")
 endif()

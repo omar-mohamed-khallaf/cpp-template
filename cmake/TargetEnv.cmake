@@ -73,14 +73,15 @@ set(COMMON_CMAKE_ARGS
     # to the pkg-config tool, helping it find .pc files in staging/lib/pkgconfig.
     -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH:BOOL=ON
 
-    # Ensures child projects (like jsoncpp) match the debug/release state of the superbuild.
+    # Ensures child projects match the debug/release state of the superbuild.
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-    -DCMAKE_CONFIGURATION_TYPE:STRINGS=${CMAKE_CONFIGURATION_TYPES}
 
     # Required for static libraries that will eventually be linked into shared objects 
     # or position-independent executables (prevents 'relocation R_X86_64_32' errors).
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
 
+    -DCMAKE_MODULE_PATH:PATH=${CMAKE_MODULE_PATH}
+    -DCMAKE_GENERATOR:STRING=${CMAKE_GENERATOR}
     -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
     -DCMAKE_AR:STRING=${CMAKE_AR}

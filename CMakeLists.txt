@@ -4,35 +4,41 @@ project(app_superbuild NONE)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(ExternalProject)
+include(ClangdHelpers)
 include(TargetEnv)
 
 include(Sqlite)
 include(Boost)
 
-# --- JSONCPP ---
-ExternalProject_Add(jsoncpp
-    GIT_REPOSITORY  https://github.com/open-source-parsers/jsoncpp.git
-    GIT_TAG         1.9.6
-    CMAKE_ARGS      ${COMMON_CMAKE_ARGS}
-                    -DBUILD_STATIC_LIBS:BOOL=ON
-                    -DJSONCPP_WITH_TESTS:BOOL=OFF
-)
-
 # --- APP ---
 ExternalProject_Add(app
     SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/app
     CMAKE_ARGS        ${COMMON_CMAKE_ARGS}
-    DEPENDS           sqlite jsoncpp boost
+    DEPENDS           sqlite boost
+    BUILD_ALWAYS      TRUE
 )
 
 ExternalProject_Get_Property(app BINARY_DIR)
+set(APP_EXE_NAME "app${CMAKE_EXECUTABLE_SUFFIX}")
 
-add_custom_target(link_compile_commands ALL
-    COMMAND ${CMAKE_COMMAND} -E create_symlink 
-            "${BINARY_DIR}/compile_commands.json" 
-            "${CMAKE_SOURCE_DIR}/compile_commands.json"
-    COMMENT "Linking compile_commands.json to root for clangd"
-    DEPENDS app)
+if(CMAKE_CROSSCOMPILING)
+    add_custom_target(run
+        COMMAND ${CMAKE_COMMAND} -E echo "Cannot run: Cross-compiled for ${CMAKE_SYSTEM_NAME}."
+    )
+else()
+    add_custom_target(run
+        COMMAND ${CMAKE_COMMAND} 
+                -DBINARY_DIR=${BINARY_DIR}
+                -DCONFIG=$<CONFIG>
+                -DEXE_NAME=${APP_EXE_NAME}
+                -DSTAGING_LIB_DIR=${CMAKE_STAGING_PREFIX}/lib
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunApp.cmake"
+        DEPENDS app
+        USES_TERMINAL
+        COMMAND_EXPAND_LISTS
+        COMMENT "Running application from ${BINARY_DIR}..."
+    )
+endif()
 
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")

@@ -97,6 +97,7 @@ cmake-build-*/
 
 ### clangd ###
 .cache/
+.clangd
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

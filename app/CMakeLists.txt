@@ -1,13 +1,14 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10...4.1)
 project(app LANGUAGES CXX)
 
 include(FetchContent)
+include(ClangdHelpers)
 include(CheckIPOSupported)
 check_ipo_supported(RESULT IPO_SUPPORTED OUTPUT error)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
-
 
 if(IPO_SUPPORTED)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -25,14 +26,12 @@ fetchcontent_makeavailable(fmt)
 add_executable(${PROJECT_NAME} src/main.cpp)
 
 # Find the libraries in the staging directory
-find_package(jsoncpp REQUIRED)
 find_package(SQLite3 REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS json log)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
-target_link_libraries(${PROJECT_NAME} PRIVATE JsonCpp::JsonCpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE SQLite::SQLite3)
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::headers)
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost::headers Boost::json Boost::log)
 
 target_compile_options(
   ${PROJECT_NAME}
@@ -49,3 +48,15 @@ target_compile_options(
           -Wstrict-overflow=4
           -Werror=format-security
           -Wno-missing-field-initializers)
+
+add_subdirectory(test)
+
+generate_clangd_config("${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Define a target that "dirties" the build configuration
+# This forces Ninja to re-run the CMake Configure step on the NEXT build invocation.
+add_custom_target(force_reconfigure_clangd ALL
+    COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_LIST_FILE}"
+    COMMENT "Triggering CMake re-configure for clangd update..."
+    VERBATIM
+)
