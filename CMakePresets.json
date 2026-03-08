@@ -1,0 +1,163 @@
+{
+  "version": 10,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base-v3",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": {
+          "type": "BOOL",
+          "value": "ON"
+        }
+      }
+    },
+    {
+      "name": "linux-host",
+      "displayName": "Linux Host",
+      "inherits": "base-v3"
+    },
+    {
+      "name": "linux-musl-x64",
+      "displayName": "Linux musl x64",
+      "inherits": "base-v3",
+      "toolchainFile": "$env{TOOLCHAIN_ROOT}/x86-64-linux-musl/share/buildroot/toolchainfile.cmake"
+    },
+    {
+      "name": "base-android",
+      "hidden": true,
+      "inherits": "base-v3",
+      "cacheVariables": {
+        "ANDROID_PLATFORM": {
+          "type": "STRING",
+          "value": "android-23"
+        },
+        "CMAKE_SYSTEM_NAME": {
+          "type": "STRING",
+          "value": "Android"
+        }
+      },
+      "toolchainFile": "$env{ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake"
+    },
+    {
+      "name": "android-arm64",
+      "displayName": "Android ARM64",
+      "inherits": "base-android",
+      "cacheVariables": {
+        "TARGET_HOST": {
+          "type": "STRING",
+          "value": "aarch64-linux-android"
+        },
+        "ANDROID_ABI": {
+          "type": "STRING",
+          "value": "arm64-v8a"
+        }
+      }
+    },
+    {
+      "name": "android-armv7",
+      "displayName": "Android ARMv7",
+      "inherits": "base-android",
+      "cacheVariables": {
+        "TARGET_HOST": {
+          "type": "STRING",
+          "value": "arm-linux-android"
+        },
+        "ANDROID_ABI": {
+          "type": "STRING",
+          "value": "armeabi-v7a"
+        }
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "base-build",
+      "hidden": true,
+      "jobs": 0
+    },
+    {
+      "name": "debug-host",
+      "configurePreset": "linux-host",
+      "inherits": "base-build",
+      "configuration": "Debug"
+    },
+    {
+      "name": "debug-android-arm64",
+      "configurePreset": "android-arm64",
+      "inherits": "base-build",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-host",
+      "configurePreset": "linux-host",
+      "inherits": "base-build",
+      "configuration": "Release"
+    },
+    {
+      "name": "release-musl-x64",
+      "configurePreset": "linux-musl-x64",
+      "inherits": "base-build",
+      "configuration": "Release"
+    },
+    {
+      "name": "release-android-arm64",
+      "configurePreset": "android-arm64",
+      "inherits": "base-build",
+      "configuration": "Release"
+    },
+    {
+      "name": "release-android-armv7",
+      "configurePreset": "android-armv7",
+      "inherits": "base-build",
+      "configuration": "Release"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "base-package",
+      "hidden": true,
+      "generators": [
+        "TXZ"
+      ],
+      "configurations": [
+        "Release"
+      ],
+      "variables": {
+        "CPACK_INCLUDE_TOPLEVEL_DIRECTORY": "OFF",
+        "CPACK_STRIP_FILES": "ON",
+        "CPACK_THREADS": "0"
+      }
+    },
+    {
+      "name": "pkg-linux-host",
+      "displayName": "Package: Linux Host",
+      "configurePreset": "linux-host",
+      "inherits": "base-package"
+    },
+    {
+      "name": "pkg-linux-musl-x64",
+      "displayName": "Package: Linux musl x64",
+      "configurePreset": "linux-musl-x64",
+      "inherits": "base-package"
+    },
+    {
+      "name": "pkg-android-arm64",
+      "displayName": "Package: Android ARM64",
+      "configurePreset": "android-arm64",
+      "inherits": "base-package"
+    },
+    {
+      "name": "pkg-android-armv7",
+      "displayName": "Package: Android ARMv7",
+      "configurePreset": "android-armv7",
+      "inherits": "base-package"
+    }
+  ]
+}
